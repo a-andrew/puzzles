@@ -4,11 +4,27 @@ var fs = require('fs');
 var url = require('url');
 var http = require('http');
 var colors = require('colors');
+var CPuzzler = require('./classes/CPuzzler').getInstance();
 
 var server = http.createServer((req, res) => {
-  var filename = url.parse(req.url).pathname.substr(1)
+  var reqUrl = url.parse(req.url);
+  var filename = reqUrl.pathname.substr(1)
     ? url.parse(req.url).pathname.substr(1)
     : 'index.html';
+
+  if (typeof CPuzzler[filename] === 'function') {
+    if (!reqUrl.query) {
+      res.writeHead(200, {'Content-Type': 'application/json'});
+      return res.end(JSON.stringify({err: 'no image received'}));
+    }
+
+    CPuzzler[filename](reqUrl.query, (err, data) => {
+      res.writeHead(200, {'Content-Type': 'application/json'});
+      res.end(JSON.stringify({err: err, data: data}));
+    });
+
+    return;
+  }
 
   fs.readFile([__dirname, 'public', filename].join('/'), (err, content) => {
     if (err) {
