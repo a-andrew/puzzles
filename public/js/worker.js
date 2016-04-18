@@ -1,22 +1,42 @@
 'use strict';
 
-$(function () {
-  $('#helloBtn').click(() => {
-    Socket.socket.emit('helloMsg', 'Server, hello');
+$(function() {
+  var settings = {};
+
+  $('#calculate').click(() => {
+    var img = $('#image').val();
+    $.ajax({
+      url: 'http://localhost:3000/calculate',
+      type: 'GET',
+      data: img,
+      success: function(data) {
+        if(data.err) {
+          return console.error(data.err);
+        }
+
+        $('#result').append('<p>Width: ' + data.data.image.width);
+        $('#result').append('<p>Height: ' + data.data.image.height);
+        $('#result').append('<p>Size: ' + data.data.size);
+      }
+    });
   });
 
   $('#getPuzzle').click(() => {
-    var img = $('#image').val();
     $.ajax({
       url: 'http://localhost:3000/builder',
       type: 'GET',
-      data: img,
-      success: function (data) {
-        if (data.err) {
-          return console.error(err);
+      success: function(data) {
+        if(data.err) {
+          return console.error(data.err);
         }
 
-        $('#result').append('<img src=' + data.data + '>');
+        for(var i = 0; i < data.data.length; ++i) {
+          for(var j = 0; j < data.data[i].length; ++j) {
+            $('#result').append('<img style="margin-right: -15px; margin-bottom: -17px;" src="' + data.data[i][j] + '">');
+          }
+
+          $('#result').append('<br>');
+        }
       }
     });
   });
@@ -31,7 +51,7 @@ $(function () {
     var image = new Image();
     image.src = '../yellowstone.jpg';
 
-    image.onload = function () {
+    image.onload = function() {
       context.drawImage(image, 0, 0, imageWidth, imageHeight);
 
       var newCanvas = document.createElement('canvas');
@@ -39,14 +59,15 @@ $(function () {
       var outCanvas = document.createElement('canvas');
       var outContext = outCanvas.getContext('2d');
       var newImage = new Image();
-      newImage.src = '../puzzle_pieces/new.png';
-      newImage.onload = function () {
-        newContext.drawImage(newImage, 0, 0);
-        outContext.putImageData(context.getImageData(0, 0, newImage.width, newImage.height), 0, 0);
-        newContext.globalCompositeOperation = "source-in";
-        newContext.drawImage(outCanvas, 0, 0);
-
+      newImage.src = '../0001.png';
+      newImage.onload = function() {
+        newContext.drawImage(newImage, 0, 0, 25, newImage.height * (25 / newImage.width));
         $('#result').append(newCanvas);
+        /*
+         outContext.putImageData(context.getImageData(0, 0, newImage.width, newImage.height), 0, 0);
+         newContext.globalCompositeOperation = "source-in";
+         newContext.drawImage(outCanvas, 0, 0);*/
+
       };
     };
   });

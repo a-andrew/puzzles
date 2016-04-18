@@ -4,6 +4,7 @@ var fs = require('fs');
 var url = require('url');
 var http = require('http');
 var colors = require('colors');
+
 var CPuzzler = require('./classes/CPuzzler').getInstance();
 
 var server = http.createServer((req, res) => {
@@ -12,8 +13,8 @@ var server = http.createServer((req, res) => {
     ? url.parse(req.url).pathname.substr(1)
     : 'index.html';
 
-  if (typeof CPuzzler[filename] === 'function') {
-    if (!reqUrl.query) {
+  if(typeof CPuzzler[filename] === 'function') {
+    if(!reqUrl.query) {
       res.writeHead(200, {'Content-Type': 'application/json'});
       return res.end(JSON.stringify({err: 'no image received'}));
     }
@@ -27,7 +28,7 @@ var server = http.createServer((req, res) => {
   }
 
   fs.readFile([__dirname, 'public', filename].join('/'), (err, content) => {
-    if (err) {
+    if(err) {
       res.writeHead(404);
       return res.end('Oops, page not found');
     }
