@@ -7,8 +7,8 @@ $(function() {
     var img = $('#image').val();
     $.ajax({
       url: 'http://localhost:3000/calculate',
-      type: 'GET',
-      data: img,
+      type: 'PUT',
+      data: {image: img},
       success: function(data) {
         if(data.err) {
           return console.error(data.err);
@@ -24,15 +24,15 @@ $(function() {
   $('#getPuzzle').click(() => {
     $.ajax({
       url: 'http://localhost:3000/builder',
-      type: 'GET',
+      type: 'PUT',
       success: function(data) {
         if(data.err) {
           return console.error(data.err);
         }
 
-        for(var i = 0; i < data.data.length; ++i) {
-          for(var j = 0; j < data.data[i].length; ++j) {
-            $('#result').append('<img style="margin-right: -15px; margin-bottom: -17px;" src="' + data.data[i][j] + '">');
+        for(var i = 0; i < data.length; ++i) {
+          for(var j = 0; j < data[i].length; ++j) {
+            $('#result').append('<img style="margin-right: -15px; margin-bottom: -17px;" src="' + data[i][j] + '">');
           }
 
           $('#result').append('<br>');

@@ -31,9 +31,9 @@ class CPuzzler {
     return this.instance;
   }
 
-  calculate(image, done) {
+  calculate(req, res) {
     var self = this;
-    self.loadImages(self, image, (err, images) => {
+    self.loadImages(self, req.body.image, (err, images) => {
       if(err) {return done(err)}
 
       images.origin = self.chooseImageDims(self, images.origin);
@@ -42,13 +42,15 @@ class CPuzzler {
       self.settings.area.image = images.origin;
       self.settings.chunks.all = images.chunks;
 
-      done(null, {
-        image: {
-          width: self.settings.area.width,
-          height: self.settings.area.height
-        },
-        size: self.settings.chunks.rows + 'x' + self.settings.chunks.cols
-      })
+      res.json({
+        err: err, data: {
+          image: {
+            width: self.settings.area.width,
+            height: self.settings.area.height
+          },
+          size: self.settings.chunks.rows + 'x' + self.settings.chunks.cols
+        }
+      });
     });
   }
 
@@ -91,12 +93,16 @@ class CPuzzler {
     self.settings.chunks.tailWidthY = self.settings.chunks.height * (self.settings.chunks.tail / 100);
   }
 
-  builder(image, done) {
+  build(req, res) {
     var self = this;
     async.waterfall([
       _.partial(self.buildGrid, self),
       _.partial(self.renderChunks, self)
-    ], done);
+    ], function(err, puzzles) {
+      if(err) {return res.serverError(err)}
+
+      res.json(puzzles);
+    });
   }
 
   loadImages(self, originLink, done) {
@@ -240,6 +246,12 @@ class CPuzzler {
       done(null, image);
     });
   }
+
+  /*  bind(func, context) {
+   return function() {
+   return func.apply(context, arguments);
+   };
+   }*/
 }
 
 module.exports = CPuzzler;
